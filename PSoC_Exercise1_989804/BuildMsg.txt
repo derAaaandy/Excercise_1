@@ -1,0 +1,14 @@
+Starting MAKE...
+creating project.mk -- no changes
+
+Linking..
+
+  ROM 8% full. 1171 out of 16384 bytes used (does not include absolute areas).
+
+  RAM 6% full. 15 bytes used (does not include stack usage).
+
+Built with ICCM8C STD V7.05.00
+
+ 
+PSoC_Exercise1_989804 - 0 error(s) 0 warning(s) 18:28:21
+

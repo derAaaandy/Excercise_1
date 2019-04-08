@@ -1,0 +1,236 @@
+                        .module main.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./main.c
+                        .area lit(rom, con, rel, lit)
+ 0000           L2:
+ 0000 416E647265617300  .byte 'A,'n,'d,'r,'e,'a,'s,0
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./main.c
+ 0000                   .dbfile C:\Users\Andi\Desktop\Unishit\Master\PSoC\PSOC_E~1\PSOC_E~1\main.c
+ 0000                   .dbfunc e main _main fV
+ 0000           ;         theStr -> X+2
+ 0000           ;        counter -> X+1
+ 0000           ;          press -> X+0
+ 0000           _main::
+ 0000                   .dbline -1
+ 0000 10                push X
+ 0001 4F                mov X,SP
+ 0002 380A              add SP,10
+ 0004                   .dbline 24
+ 0004           ; //--------------------------------------------------------------------
+ 0004           ; //
+ 0004           ; //  @author: Andreas Scholz
+ 0004           ; //    @date: 08.04.2019
+ 0004           ; //    @course ID: PSoC Design TX00DB04
+ 0004           ; //
+ 0004           ; //    @descrition:
+ 0004           ; //  The program prints the string “Andreas" in first line on a LCD.
+ 0004           ; //  In second line there is a counter which increases on each 
+ 0004           ; //  button press.
+ 0004           ; //
+ 0004           ; //  When Button is pressed LED1 toogles with rate of 1 Hz. 
+ 0004           ; //
+ 0004           ; //--------------------------------------------------------------------
+ 0004           ; 
+ 0004           ; #include <m8c.h>        // part specific constants and macros  
+ 0004           ; #include "PSoCAPI.h"    // PSoC API definitions for all User Modules 
+ 0004           ; 
+ 0004           ; // Function declaration
+ 0004           ; void PSoC_init(void);
+ 0004           ; 
+ 0004           ; // main function
+ 0004           ; void main(void)
+ 0004           ; {
+ 0004                   .dbline 26
+ 0004           ; 
+ 0004           ;       char theStr[] = "Andreas";      // Define RAM string
+ 0004 550000            mov [__r1],<L2
+ 0007 550000            mov [__r0],>L2
+ 000A 5A00              mov [__r3],X
+ 000C 060002            add [__r3],2
+ 000F 10                push X
+ 0010 550000            mov [__rX],0
+ 0013 5100              mov A,[__r0]
+ 0015 5800              mov X,[__r1]
+ 0017           X1:
+ 0017 08                push A
+ 0018 28                romx
+ 0019 3F00              mvi [__r3],A
+ 001B 18                pop A
+ 001C 75                inc X
+ 001D 0900              adc A,0
+ 001F 7600              inc [__rX]
+ 0021 3C0008            cmp [__rX],8
+ 0024 BFF2              jnz X1
+ 0026 20                pop X
+ 0027                   .dbline 27
+ 0027           ;       char counter = 0;                       // Button press counter
+ 0027 560100            mov [X+1],0
+ 002A                   .dbline 28
+ 002A           ;       char press=FALSE;                       // Button status variable
+ 002A 560000            mov [X+0],0
+ 002D                   .dbline 30
+ 002D           ;       
+ 002D           ;       PSoC_init();                    // Init of LED/LCD/Timer
+ 002D 906A              xcall _PSoC_init
+ 002F                   .dbline 32
+ 002F           ;       
+ 002F           ;       LED_1_Switch(1);        // Turn on LED  
+ 002F 10                push X
+ 0030 5001              mov A,1
+ 0032 7C0000            xcall _LED_1_Switch
+ 0035                   .dbline 33
+ 0035           ;       LCD_Position(0,5);              // Place LCD cursor at row 0, col 1
+ 0035 5705              mov X,5
+ 0037 5000              mov A,0
+ 0039 7C0000            xcall _LCD_Position
+ 003C 20                pop X
+ 003D                   .dbline 34
+ 003D           ;       LCD_PrString(theStr);   // Print defined string on the LCD
+ 003D 5A00              mov [__r1],X
+ 003F 060002            add [__r1],2
+ 0042 10                push X
+ 0043 5100              mov A,[__r0]
+ 0045 08                push A
+ 0046 5100              mov A,[__r1]
+ 0048 5C                mov X,A
+ 0049 18                pop A
+ 004A 7C0000            xcall _LCD_PrString
+ 004D 20                pop X
+ 004E 8043              xjmp L4
+ 0050           L3:
+ 0050                   .dbline 36
+ 0050           ;       
+ 0050           ;       while(1){                               // infinity loop
+ 0050                   .dbline 39
+ 0050           ; 
+ 0050           ;               //if button is pressed
+ 0050           ;               if( Button_Data_ADDR & Button_MASK ) {
+ 0050 5D04              mov A,REG[0x4]
+ 0052 5300              mov [__r0],A
+ 0054 470002            tst [__r0],2
+ 0057 A019              jz L6
+ 0059                   .dbline 42
+ 0059           ;                       
+ 0059           ;                       // if button not pressed in last round
+ 0059           ;                       if (press==FALSE){
+ 0059                   .dbline 42
+ 0059 3D0000            cmp [X+0],0
+ 005C B006              jnz L8
+ 005E                   .dbline 44
+ 005E           ;                               // set status to Button pressed 
+ 005E           ;                               press=TRUE;
+ 005E                   .dbline 44
+ 005E 560001            mov [X+0],1
+ 0061                   .dbline 46
+ 0061           ;                               // increase counter
+ 0061           ;                               counter +=1;
+ 0061 7701              inc [X+1]
+ 0063                   .dbline 47
+ 0063           ;                       }
+ 0063           L8:
+ 0063                   .dbline 50
+ 0063           ;               
+ 0063           ;                       // Set Sleep Timer to 1 Hz
+ 0063           ;                       SleepTimer_SyncWait(32, SleepTimer_WAIT_RELOAD);
+ 0063 10                push X
+ 0064 5700              mov X,0
+ 0066 5020              mov A,32
+ 0068 7C0000            xcall _SleepTimer_SyncWait
+ 006B                   .dbline 52
+ 006B           ;                       // Inverts LED1
+ 006B           ;                       LED_1_Invert ();
+ 006B 7C0000            xcall _LED_1_Invert
+ 006E 20                pop X
+ 006F                   .dbline 54
+ 006F           ;                       
+ 006F           ;               }
+ 006F 8004              xjmp L7
+ 0071           L6:
+ 0071                   .dbline 56
+ 0071           ;               // else set status to Button not pressed
+ 0071           ;               else press = FALSE;
+ 0071 560000            mov [X+0],0
+ 0074           L7:
+ 0074                   .dbline 59
+ 0074           ;               
+ 0074           ;               // Turn on LED in case of button not pressed
+ 0074           ;               if (press==FALSE) LED_1_Switch(1);              
+ 0074 3D0000            cmp [X+0],0
+ 0077 B008              jnz L10
+ 0079                   .dbline 59
+ 0079 10                push X
+ 007A 5001              mov A,1
+ 007C 7C0000            xcall _LED_1_Switch
+ 007F 20                pop X
+ 0080           L10:
+ 0080                   .dbline 61
+ 0080           ;               
+ 0080           ;               LCD_Position(1,6);              // Place LCD cursor at row 1, col 5.
+ 0080 10                push X
+ 0081 5706              mov X,6
+ 0083 5001              mov A,1
+ 0085 7C0000            xcall _LCD_Position
+ 0088 20                pop X
+ 0089                   .dbline 62
+ 0089           ;               LCD_PrHexInt(counter);  // Print counter result on the LCD
+ 0089 5201              mov A,[X+1]
+ 008B 10                push X
+ 008C 5700              mov X,0
+ 008E 7C0000            xcall _LCD_PrHexInt
+ 0091 20                pop X
+ 0092                   .dbline 63
+ 0092           ;       }
+ 0092           L4:
+ 0092                   .dbline 36
+ 0092 8FBD              xjmp L3
+ 0094           X0:
+ 0094                   .dbline -2
+ 0094           L1:
+ 0094 38F6              add SP,-10
+ 0096 20                pop X
+ 0097                   .dbline 0 ; func end
+ 0097 8FFF              jmp .
+ 0099                   .dbsym l theStr 2 A[8:8]c
+ 0099                   .dbsym l counter 1 c
+ 0099                   .dbsym l press 0 c
+ 0099                   .dbend
+ 0099                   .dbfunc e PSoC_init _PSoC_init fV
+ 0099           _PSoC_init::
+ 0099                   .dbline -1
+ 0099                   .dbline 66
+ 0099           ; }
+ 0099           ; 
+ 0099           ; void PSoC_init(void){
+ 0099                   .dbline 68
+ 0099           ;       
+ 0099           ;       LED_1_Start();                                                          // LED init
+ 0099 10                push X
+ 009A 7C0000            xcall _LED_1_Start
+ 009D 20                pop X
+ 009E                   .dbline 70
+ 009E           ;       
+ 009E           ;       M8C_EnableGInt ;                            // Turn on interrupts 
+ 009E 7101                      or  F, 01h
+ 00A0           
+ 00A0                   .dbline 71
+ 00A0           ;       SleepTimer_Start();                                                     // Sleep timer init
+ 00A0 10                push X
+ 00A1 7C0000            xcall _SleepTimer_Start
+ 00A4                   .dbline 72
+ 00A4           ;       SleepTimer_SetInterval(SleepTimer_64_HZ);   // Set interrupt to
+ 00A4 5008              mov A,8
+ 00A6 7C0000            xcall _SleepTimer_SetInterval
+ 00A9                   .dbline 73
+ 00A9           ;       SleepTimer_EnableInt();                     // a 64 Hz rate
+ 00A9 7C0000            xcall _SleepTimer_EnableInt
+ 00AC                   .dbline 75
+ 00AC           ; 
+ 00AC           ;       LCD_Start();                                            // LCD Init
+ 00AC 7C0000            xcall _LCD_Start
+ 00AF 20                pop X
+ 00B0                   .dbline -2
+ 00B0           L12:
+ 00B0                   .dbline 0 ; func end
+ 00B0 7F                ret
+ 00B1                   .dbend
